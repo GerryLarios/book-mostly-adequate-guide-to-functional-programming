@@ -1,0 +1,24 @@
+{
+  "name": "book-mostly-adequate-guide-to-functional-programming",
+  "version": "1.0.0",
+  "description": "I read Mostly Adequate Guide to Functional Programming by Professor Frisby, and this repo contains my code and notes.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GerryLarios/book-mostly-adequate-guide-to-functional-programming.git"
+  },
+  "keywords": [
+    "functional",
+    "programmin",
+    "javascript"
+  ],
+  "author": "Gerardo Manuel Chavez Larios",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GerryLarios/book-mostly-adequate-guide-to-functional-programming/issues"
+  },
+  "homepage": "https://github.com/GerryLarios/book-mostly-adequate-guide-to-functional-programming#readme"
+}
