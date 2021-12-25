@@ -1,4 +1,21 @@
-const { compose, curry, inspect, identity } = require('./appendix_a');
+// curry :: ((a, b, ...) -> c) -> a -> b -> ... -> c
+function curry(fn) {
+  const arity = fn.length;
+
+  return function $curry(...args) {
+    if (args.length < arity) {
+      return $curry.bind(null, ...args);
+    }
+
+    return fn.call(null, ...args);
+  };
+}
+
+// compose :: ((y -> z), (x -> y),  ..., (a -> b)) -> a -> z
+const compose = (...fns) => (...args) => fns.reduceRight((res, fn) => [fn.call(null, ...res)], args)[0];
+
+// identity :: x -> x
+const identity = x => x;
 
 class Either {
   constructor(x) {
@@ -374,7 +391,7 @@ class Task {
   }
 }
 
-module.export = {
+module.exports = {
   Either,
   Right,
   Left,

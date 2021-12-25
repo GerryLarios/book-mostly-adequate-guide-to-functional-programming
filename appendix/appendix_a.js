@@ -1,17 +1,23 @@
 const { Left, Maybe, Task } = require('./appendix_b');
 
+// curry :: ((a, b, ...) -> c) -> a -> b -> ... -> c
+function curry(fn) {
+  const arity = fn.length;
+
+  return function $curry(...args) {
+    if (args.length < arity) {
+      return $curry.bind(null, ...args);
+    }
+
+    return fn.call(null, ...args);
+  };
+}
+
 // always :: a -> b -> a
 const always = curry((a, _) => a);
 
 // compose :: ((y -> z), (x -> y),  ..., (a -> b)) -> a -> z
 const compose = (...fns) => (...args) => fns.reduceRight((res, fn) => [fn.call(null, ...res)], args)[0];
-
-// curry :: ((a, b, ...) -> c) -> a -> b -> ... -> c
-const curry = (fn = () => {}) => {
-  return function $curry(...args) {
-    return args.length < fn.length ? $curry.bind(null, ...args) : fn.call(null, ...args);
-  };
-}
 
 // either :: (a -> c) -> (b -> c) -> Either a b -> c
 const either = curry((f, g, e) => e.isLeft ? f(e.$value) : g(e.$value));
@@ -69,7 +75,7 @@ const nothing = Maybe.of(null);
 // reject :: a -> Task a b
 const reject = a => Task.rejected(a);
 
-module.export = {
+module.exports = {
   always,
   compose,
   curry,
