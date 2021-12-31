@@ -402,4 +402,4 @@ module.exports = {
   Map,
   Maybe,
   Task
-}
+};

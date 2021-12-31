@@ -4,6 +4,9 @@ const { Left, Maybe, Task } = require('./appendix_b');
 // we can transform a function with multiple arguments into a sequence of nesting functions.
 // It returns a new function that expects the next argument inline.
 // Currying break down a function that takes multiple arguments into a series of functions that each take only one argument.
+// It is a technique in functional programming, transformation of the function of multiple arguments
+// into several functions of a single argument in sequence. 
+// Note: An American mathematician named Haskell Curry developed this technique, that’s why it is called as currying.
 
 // curry :: ((a, b, ...) -> c) -> a -> b -> ... -> c
 function curry(fn) {
@@ -25,6 +28,10 @@ function curry(fn) {
 
 // always :: a -> b -> a
 const always = curry((a, _) => a);
+
+// Function composition is a mechanism of combining multiple simple functions to build a more complicated one.
+// So the main difference between compose and pipe is the order of the composition.
+// Compose performs a right-to-left function composition since Pipe performs a left-to-right composition.
 
 // compose :: ((y -> z), (x -> y),  ..., (a -> b)) -> a -> z
 const compose = (...fns) => (...args) => fns.reduceRight((res, fn) => [fn.call(null, ...res)], args)[0];

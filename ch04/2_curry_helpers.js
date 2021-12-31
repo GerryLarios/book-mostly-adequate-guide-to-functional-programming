@@ -30,3 +30,5 @@ console.log(
 
 // What's demonstrated here is the ability to "pre-load" a function with an argument or two
 // in order to receive a new function that remembers those arguments.
+// The point of currying is that if you don’t provide all the parameters for a function, it returns a function that tells you what’s left in the list.
+// In a way, it is a checking method to make sure that you’ve got everything you need before you proceed.
