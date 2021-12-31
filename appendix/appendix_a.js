@@ -1,10 +1,20 @@
 const { Left, Maybe, Task } = require('./appendix_b');
 
+// Currying is a process in functional programming in which
+// we can transform a function with multiple arguments into a sequence of nesting functions.
+// It returns a new function that expects the next argument inline.
+// Currying break down a function that takes multiple arguments into a series of functions that each take only one argument.
+
 // curry :: ((a, b, ...) -> c) -> a -> b -> ... -> c
 function curry(fn) {
-  const arity = fn.length;
+  const arity = fn.length; // The number of arguments a function takes is also called arity.
+  // function that takes two arguments is called 2-arity function.
 
-  return function $curry(...args) {
+  // Currying and Partial Application are related (because of closure), but they are of different concepts.
+  // Partial application transforms a function into another function with smaller `arity`.
+  // Currying generates nested functions based on the number of arguments passed into the function.
+  // Each function is given a parameter. There is no currying if there is no argument.
+  return function $curry(...args) { // `Closure ` makes currying possible in JavaScript.
     if (args.length < arity) {
       return $curry.bind(null, ...args);
     }

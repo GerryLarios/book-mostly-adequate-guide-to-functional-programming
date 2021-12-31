@@ -2,6 +2,7 @@ const { curry } = require('../appendix/appendix_a');
 
 // Giving a function fewer arguments than it expects is typically called partial application.
 // Partially applying a function can remove a lot of boiler plate code.
+// Higher order function is a function that takes or returns a function. Map, Filter, Sort...
 
 const map = curry((f, xs) => xs.map(f));
 const datenow = Date.now();
