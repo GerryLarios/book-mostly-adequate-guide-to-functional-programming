@@ -5,7 +5,7 @@ const { Left, Maybe, Task } = require('./appendix_b');
 // It returns a new function that expects the next argument inline.
 // Currying break down a function that takes multiple arguments into a series of functions that each take only one argument.
 // It is a technique in functional programming, transformation of the function of multiple arguments
-// into several functions of a single argument in sequence. 
+// into several functions of a single argument in sequence.
 // Note: An American mathematician named Haskell Curry developed this technique, that’s why it is called as currying.
 
 // curry :: ((a, b, ...) -> c) -> a -> b -> ... -> c
@@ -17,7 +17,8 @@ function curry(fn) {
   // Partial application transforms a function into another function with smaller `arity`.
   // Currying generates nested functions based on the number of arguments passed into the function.
   // Each function is given a parameter. There is no currying if there is no argument.
-  return function $curry(...args) { // `Closure ` makes currying possible in JavaScript.
+  return function $curry(...args) {
+    // `Closure ` makes currying possible in JavaScript.
     if (args.length < arity) {
       return $curry.bind(null, ...args);
     }
@@ -34,13 +35,16 @@ const always = curry((a, _) => a);
 // Compose performs a right-to-left function composition since Pipe performs a left-to-right composition.
 
 // compose :: ((y -> z), (x -> y),  ..., (a -> b)) -> a -> z
-const compose = (...fns) => (...args) => fns.reduceRight((res, fn) => [fn.call(null, ...res)], args)[0];
+const compose =
+  (...fns) =>
+  (...args) =>
+    fns.reduceRight((res, fn) => [fn.call(null, ...res)], args)[0];
 
 // either :: (a -> c) -> (b -> c) -> Either a b -> c
-const either = curry((f, g, e) => e.isLeft ? f(e.$value) : g(e.$value));
+const either = curry((f, g, e) => (e.isLeft ? f(e.$value) : g(e.$value)));
 
 // identity :: x -> x
-const identity = x => x;
+const identity = (x) => x;
 
 // inspect :: a -> String
 const inspect = (x) => {
@@ -58,8 +62,8 @@ const inspect = (x) => {
         return `'${t}'`;
       }
       case 'object': {
-        const ts = Object.keys(t).map(k => [k, inspect( t[k] )]);
-        return `{${ ts.map(kv => kv.join(': ')).join(', ') }}`
+        const ts = Object.keys(t).map((k) => [k, inspect(t[k])]);
+        return `{${ts.map((kv) => kv.join(': ')).join(', ')}}`;
       }
       default: {
         return String(t);
@@ -68,14 +72,16 @@ const inspect = (x) => {
   }
 
   function inspectArgs(args) {
-    return Array.isArray(args) ?  `[${args.map(inspect).join(', ')}]` : inspectTerm(args);
+    return Array.isArray(args)
+      ? `[${args.map(inspect).join(', ')}]`
+      : inspectTerm(args);
   }
 
-  return (typeof x === 'function') ? inspectFn(x) : inspectArgs(x);
+  return typeof x === 'function' ? inspectFn(x) : inspectArgs(x);
 };
 
 // left :: a -> Either a b
-const left = a => new Left(a);
+const left = (a) => new Left(a);
 
 // liftA2 :: (Applicative f) => (a1 -> a2 -> b) -> f a1 -> f a2 -> f b
 const liftA2 = curry((fn, a1, a2) => a1.map(fn).ap(a2));
@@ -84,13 +90,13 @@ const liftA2 = curry((fn, a1, a2) => a1.map(fn).ap(a2));
 const liftA3 = curry((fn, a1, a2, a3) => a1.map(fn).ap(a2).ap(a3));
 
 // maybe :: b -> (a -> b) -> Maybe a -> b
-const maybe = curry((v, f, m) => m.isNothing ? v : f(m.$value));
+const maybe = curry((v, f, m) => (m.isNothing ? v : f(m.$value)));
 
 // nothing :: Maybe a
 const nothing = Maybe.of(null);
 
 // reject :: a -> Task a b
-const reject = a => Task.rejected(a);
+const reject = (a) => Task.rejected(a);
 
 module.exports = {
   always,
@@ -104,5 +110,5 @@ module.exports = {
   liftA3,
   maybe,
   nothing,
-  reject
-}
+  reject,
+};

@@ -1,3 +1,36 @@
+const inspect = (x) => {
+  if (x && typeof x.inspect === 'function') {
+    return x.inspect();
+  }
+
+  function inspectFn(f) {
+    return f.name ? f.name : f.toString();
+  }
+
+  function inspectTerm(t) {
+    switch (typeof t) {
+      case 'string': {
+        return `'${t}'`;
+      }
+      case 'object': {
+        const ts = Object.keys(t).map((k) => [k, inspect(t[k])]);
+        return `{${ts.map((kv) => kv.join(': ')).join(', ')}}`;
+      }
+      default: {
+        return String(t);
+      }
+    }
+  }
+
+  function inspectArgs(args) {
+    return Array.isArray(args)
+      ? `[${args.map(inspect).join(', ')}]`
+      : inspectTerm(args);
+  }
+
+  return typeof x === 'function' ? inspectFn(x) : inspectArgs(x);
+};
+
 // curry :: ((a, b, ...) -> c) -> a -> b -> ... -> c
 function curry(fn) {
   const arity = fn.length;
@@ -12,10 +45,13 @@ function curry(fn) {
 }
 
 // compose :: ((y -> z), (x -> y),  ..., (a -> b)) -> a -> z
-const compose = (...fns) => (...args) => fns.reduceRight((res, fn) => [fn.call(null, ...res)], args)[0];
+const compose =
+  (...fns) =>
+  (...args) =>
+    fns.reduceRight((res, fn) => [fn.call(null, ...res)], args)[0];
 
 // identity :: x -> x
-const identity = x => x;
+const identity = (x) => x;
 
 class Either {
   constructor(x) {
@@ -38,12 +74,14 @@ class Right extends Either {
   }
 
   static of(_) {
-    throw new Error('`of` called on class Right (value) instead of Either (type)');
+    throw new Error(
+      '`of` called on class Right (value) instead of Either (type)'
+    );
   }
 
-  // [util.inspect.custom]() {
-  //   return `Right(${inspect(this.$value)})`;
-  // }
+  inspect() {
+    return `Right(${inspect(this.$value)})`;
+  }
 
   // ----- Functor (Either a)
   map(fn) {
@@ -84,12 +122,14 @@ class Left extends Either {
   }
 
   static of(_) {
-    throw new Error('`of` called on class Left (value) instead of Either (type)');
+    throw new Error(
+      '`of` called on class Left (value) instead of Either (type)'
+    );
   }
 
-  // [util.inspect.custom]() {
-  //   return `Left(${inspect(this.$value)})`;
-  // }
+  inspect() {
+    return `Left(${inspect(this.$value)})`;
+  }
 
   // ----- Functor (Either a)
   map() {
@@ -120,39 +160,42 @@ class Left extends Either {
   }
 }
 
-const createCompose = curry((F, G) => class Compose {
-  constructor(x) {
-    this.$value = x;
-  }
+const createCompose = curry(
+  (F, G) =>
+    class Compose {
+      constructor(x) {
+        this.$value = x;
+      }
 
-  // [util.inspect.custom]() {
-  //   return `Compose(${inspect($this.$value)})`;
-  // }
+      inspect() {
+        return `Compose(${inspect($this.$value)})`;
+      }
 
-  // ----- Pointed (Compose F G)
-  static of(x) {
-    return new Compose(F(G(x)));
-  }
+      // ----- Pointed (Compose F G)
+      static of(x) {
+        return new Compose(F(G(x)));
+      }
 
-  // ----- Functor (Compose F G)
-  map(fn) {
-    return new Compose(this.$value.map(x => x.map(fn)))
-  }
+      // ----- Functor (Compose F G)
+      map(fn) {
+        return new Compose(this.$value.map((x) => x.map(fn)));
+      }
 
-  // ----- Applicative (Compose F G)
-  ap(f) {
-    return f.map(this.$value);
-  }
-});
+      // ----- Applicative (Compose F G)
+      ap(f) {
+        return f.map(this.$value);
+      }
+    }
+);
 
 class Identity {
   constructor(x) {
     this.$value = x;
   }
 
-  // [util.inspect.custom]() {
-  //   return `Identity(${inspect($this.$value)})`;
-  // }
+  inspect() {
+    return `Identity(${inspect($this.$value)})`;
+  }
 
   // ----- Pointed Identity
   static of(x) {
@@ -193,9 +236,9 @@ class IO {
     this.unsafePerfomIo = fn;
   }
 
-  // [util.inspect.custom]() {
-  //   return 'IO(?)';
-  // }
+  inspect() {
+    return 'IO(?)';
+  }
 
   // ----- Pointed IO
   static of(x) {
@@ -209,7 +252,7 @@ class IO {
 
   // ----- Applicative IO
   ap(f) {
-    return this.chain(fn => f.map(fn));
+    return this.chain((fn) => f.map(fn));
   }
 
   // ----- Monad IO
@@ -227,9 +270,9 @@ class List {
     this.$value = xs;
   }
 
-  // [util.inspect.custom]() {
-  //   return `List(${inspect(this.$value)})`;
-  // }
+  inspect() {
+    return `List(${inspect(this.$value)})`;
+  }
 
   concat(x) {
     return new List(this.$value.concat(x));
@@ -252,7 +295,10 @@ class List {
 
   traverse(of, fn) {
     return this.$value.reduce(
-      (f, a) => fn(a).map(b => bs => bs.concat(b)).ap(f),
+      (f, a) =>
+        fn(a)
+          .map((b) => (bs) => bs.concat(b))
+          .ap(f),
       of(new List([]))
     );
   }
@@ -263,9 +309,9 @@ class Map {
     this.$value = x;
   }
 
-  // [util.inspect.custom]() {
-  //   return `Map(${inspect(this.$value)})`;
-  // }
+  inspect() {
+    return `Map(${inspect(this.$value)})`;
+  }
 
   insert(k, v) {
     const singleton = {};
@@ -274,15 +320,15 @@ class Map {
   }
 
   reduceWithKeys(fn, zero) {
-    return Object.keys(this.$value).reduce((acc, k) => fn(acc, this.$value[k], k), zero);
+    return Object.keys(this.$value).reduce(
+      (acc, k) => fn(acc, this.$value[k], k),
+      zero
+    );
   }
 
   // ----- Functor (Map a)
   map(fn) {
-    return this.reduceWithKeys(
-      (m, v, k) => m.insert(k, fn(v)),
-      new Map({})
-    );
+    return this.reduceWithKeys((m, v, k) => m.insert(k, fn(v)), new Map({}));
   }
 
   // ----- Traversable (Map a)
@@ -292,7 +338,10 @@ class Map {
 
   traverse(of, fn) {
     return this.reduceWithKeys(
-      (f, a, k) => fn(a).map(b => m => m.insert(k, b)).ap(f),
+      (f, a, k) =>
+        fn(a)
+          .map((b) => (m) => m.insert(k, b))
+          .ap(f),
       of(new Map({}))
     );
   }
@@ -311,9 +360,9 @@ class Maybe {
     this.$value = x;
   }
 
-  // [util.inspect.custom]() {
-  //   return this.isNothing ? 'Nothing' : `Just(${inspect(this.$value)})`;
-  // }
+  inspect() {
+    return this.isNothing ? 'Nothing' : `Just(${inspect(this.$value)})`;
+  }
 
   // ----- Pointed Maybe
   static of(x) {
@@ -354,9 +403,9 @@ class Task {
     this.fork = fork;
   }
 
-  // [util.inspect.custom]() {
-  //   return 'Task(?)';
-  // }
+  inspect() {
+    return 'Task(?)';
+  }
 
   static rejected(x) {
     return new Task((reject, _) => reject(x));
@@ -369,20 +418,20 @@ class Task {
 
   // ----- Functor (Task a)
   map(fn) {
-    return new Task(
-      (reject, resolve) => this.fork(reject, compose(resolve, fn))
+    return new Task((reject, resolve) =>
+      this.fork(reject, compose(resolve, fn))
     );
   }
 
   // ----- Applicative (Task a)
   ap(f) {
-    return this.chain(fn => f.map(fn));
+    return this.chain((fn) => f.map(fn));
   }
 
   // ----- Monad (Task a)
   chain(fn) {
-    return new Task(
-      (reject, resolve) => this.fork(reject, x => fn(x).fork(reject, resolve))
+    return new Task((reject, resolve) =>
+      this.fork(reject, (x) => fn(x).fork(reject, resolve))
     );
   }
 
@@ -401,5 +450,5 @@ module.exports = {
   List,
   Map,
   Maybe,
-  Task
+  Task,
 };
